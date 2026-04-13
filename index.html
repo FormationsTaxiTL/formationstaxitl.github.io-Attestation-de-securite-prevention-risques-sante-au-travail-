@@ -478,6 +478,7 @@ function downloadPDF(){
   doc.setFont('helvetica','italic'); doc.setFontSize(6.5); doc.setTextColor(96,112,128);
   doc.text('Taxi TL — Service Ressources Humaines  |  L\'excellence comme moteur, depuis 1971  |  Validé par la Direction & le Management  |  MàJ le 02/03/2026', W/2, 291, {align:'center'});
 
+  doc.save(`Attestation_${formData.nom}_${formData.prenom}_${formData.sensibilisation.replace(/\//g,'-')}.pdf`);
 }
 
 function restart(){
