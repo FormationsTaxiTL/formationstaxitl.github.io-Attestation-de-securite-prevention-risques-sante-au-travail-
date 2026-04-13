@@ -334,7 +334,14 @@ function submit(){
 
   if(!ok) return;
 
-  sigData = document.getElementById('sig-canvas').toDataURL('image/png');
+  // Capturer la signature en créant un canvas temporaire à la bonne taille
+  const srcCanvas = document.getElementById('sig-canvas');
+  const exportCanvas = document.createElement('canvas');
+  exportCanvas.width = srcCanvas.offsetWidth;
+  exportCanvas.height = srcCanvas.offsetHeight;
+  const exportCtx = exportCanvas.getContext('2d');
+  exportCtx.drawImage(srcCanvas, 0, 0, exportCanvas.width, exportCanvas.height);
+  sigData = exportCanvas.toDataURL('image/png');
 
   formData = {
     nom, prenom, poste,
@@ -459,9 +466,9 @@ function downloadPDF(){
   y += 5;
 
   doc.setDrawColor(200,216,232);
-  doc.rect(M, y, CW/2-5, 28);
+  doc.rect(M, y, CW, 35);
   if(sigData){
-    doc.addImage(sigData, 'PNG', M+2, y+2, CW/2-9, 24);
+    doc.addImage(sigData, 'PNG', M+2, y+2, CW-4, 31);
   }
   y += 32;
 
