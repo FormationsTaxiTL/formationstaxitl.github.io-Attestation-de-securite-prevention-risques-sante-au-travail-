@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attestation de Sensibilisation & Formation — Taxi TL</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--blue:#0D2B5E;--teal:#2AB5C8;--teal-light:#E8F7FA;--white:#fff;--bg:#F0F5FB;--border:#C8D8E8;--text:#1a2535;--muted:#607080;--success:#1a7a55;--success-bg:#eaf5f0;--red:#c0392b}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:1.5rem 1rem}
+.app{max-width:720px;margin:0 auto}
+
+/* LOGIN */
+#screen-login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1rem}
+.login-box{background:var(--white);border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.10);width:100%;max-width:420px;overflow:hidden}
+.login-header{background:var(--blue);padding:2rem 1.75rem 1.5rem;text-align:center}
+.login-logo{font-size:32px;font-weight:800;color:white;letter-spacing:-1px;margin-bottom:6px}
+.login-header h1{color:white;font-size:17px;font-weight:700;margin-bottom:3px}
+.login-header p{color:rgba(255,255,255,.6);font-size:12px}
+.login-body{padding:1.75rem}
+.login-body label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px}
+.login-body input{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;outline:none;transition:border .2s;margin-bottom:1rem}
+.login-body input:focus{border-color:var(--teal)}
+.btn-login{width:100%;padding:12px;background:var(--blue);color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s}
+.btn-login:hover{background:#1B3F7A}
+.login-error{background:#fdf0ef;border:1px solid #f09595;border-radius:7px;padding:9px 12px;font-size:12px;color:var(--red);margin-bottom:1rem;display:none}
+
+/* FORM */
+#screen-form{display:none}
+.card{background:var(--white);border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.07);overflow:hidden;margin-bottom:1rem}
+.card-header{background:var(--blue);padding:1.25rem 1.5rem}
+.card-header .logo{font-size:22px;font-weight:800;color:white;letter-spacing:-1px;margin-bottom:2px}
+.card-header h2{color:white;font-size:15px;font-weight:700;margin-bottom:2px}
+.card-header p{color:rgba(255,255,255,.6);font-size:11px}
+.teal-bar{height:4px;background:var(--teal)}
+.card-body{padding:1.25rem 1.5rem}
+.section-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem;padding-bottom:6px;border-bottom:2px solid var(--teal)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.field-row.full{grid-template-columns:1fr}
+.field label{font-size:12px;font-weight:600;color:var(--blue);display:block;margin-bottom:4px}
+.field input{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;outline:none;transition:border .2s}
+.field input:focus{border-color:var(--teal)}
+.field input.error{border-color:var(--red)}
+
+/* THEMES */
+.themes-list{display:flex;flex-direction:column;gap:8px;margin-bottom:4px}
+.theme-item{border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;display:flex;align-items:flex-start;gap:12px;cursor:pointer;transition:all .2s;user-select:none}
+.theme-item:hover{background:var(--bg);border-color:var(--teal)}
+.theme-item.checked{background:var(--success-bg);border-color:var(--success)}
+.theme-check{width:20px;height:20px;border-radius:5px;border:2px solid var(--border);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .2s}
+.theme-item.checked .theme-check{background:var(--success);border-color:var(--success);color:white}
+.theme-body{}
+.theme-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
+.theme-item.checked .theme-name{color:var(--success)}
+.theme-desc{font-size:11px;color:var(--muted);line-height:1.5}
+
+/* SIGNATURE */
+.sig-wrap{border:1.5px solid var(--border);border-radius:10px;overflow:hidden;background:#fafcff}
+canvas{display:block;width:100%;touch-action:none}
+.sig-actions{display:flex;justify-content:flex-end;padding:8px 10px;background:#f5f8fc;border-top:1px solid var(--border)}
+.btn-clear{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 14px;border-radius:6px;font-size:12px;cursor:pointer}
+.sig-hint{font-size:11px;color:var(--muted);margin-top:6px;font-style:italic}
+
+/* ENGAGEMENT */
+.engagement-box{background:var(--teal-light);border:1px solid var(--teal);border-radius:9px;padding:12px 14px;font-size:12px;color:var(--blue);line-height:1.65;margin-bottom:1rem}
+
+/* BUTTONS */
+.btn-submit{width:100%;padding:14px;background:var(--blue);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:background .2s}
+.btn-submit:hover{background:#1B3F7A}
+.btn-submit:disabled{opacity:.4;cursor:default}
+.error-msg{color:var(--red);font-size:12px;margin-top:8px;display:none}
+
+/* SUCCESS */
+#screen-success{display:none;text-align:center;padding:2rem 1rem}
+.success-icon{font-size:52px;margin-bottom:1rem}
+.success-title{font-size:22px;font-weight:700;color:var(--blue);margin-bottom:.5rem}
+.success-sub{font-size:14px;color:var(--muted);margin-bottom:1.5rem;line-height:1.6}
+.btn-pdf{display:inline-block;padding:13px 32px;background:var(--teal);color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:background .2s;margin-bottom:.75rem}
+.btn-pdf:hover{background:#1a9ab0}
+.btn-new{display:inline-block;padding:10px 24px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:10px;font-size:13px;cursor:pointer;margin-left:8px}
+
+@media(max-width:500px){.field-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="screen-login">
+  <div class="login-box">
+    <div class="login-header">
+      <div class="login-logo">taxitl</div>
+      <h1>Attestation de Sensibilisation & Formation</h1>
+      <p>Sécurité, Prévention des Risques & Santé au Travail</p>
+      <p style="color:rgba(255,255,255,.5);font-size:11px;margin-top:6px">Validé par la Direction & le Management &nbsp;|&nbsp; MàJ le 02/03/2026</p>
+    </div>
+    <div class="login-body">
+      <div class="login-error" id="login-error">Code incorrect — vérifiez auprès de votre responsable RH.</div>
+      <label>Code d'accès</label>
+      <input type="password" id="input-code" placeholder="Code fourni par les RH" onkeydown="if(event.key==='Enter')checkCode()">
+      <button class="btn-login" onclick="checkCode()">Accéder au formulaire →</button>
+    </div>
+  </div>
+</div>
+
+<!-- FORM -->
+<div id="screen-form">
+  <div class="app">
+    <div class="card">
+      <div class="card-header">
+        <div class="logo">taxitl</div>
+        <h2>Attestation Individuelle de Sensibilisation & Formation</h2>
+        <p>Sécurité, Prévention des Risques & Santé au Travail — Art. L4141-2 & L4141-5 du Code du Travail</p>
+        <p style="color:rgba(255,255,255,.5);font-size:10px;margin-top:4px">Validé par la Direction & le Management &nbsp;|&nbsp; MàJ le 02/03/2026</p>
+      </div>
+      <div class="teal-bar"></div>
+      <div class="card-body">
+
+        <!-- IDENTIFICATION -->
+        <div class="section-title" style="margin-bottom:.75rem">1. Identification du salarié</div>
+        <div class="field-row">
+          <div class="field"><label>Nom *</label><input type="text" id="f-nom" placeholder="Nom de famille"></div>
+          <div class="field"><label>Prénom *</label><input type="text" id="f-prenom" placeholder="Prénom"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Poste occupé *</label><input type="text" id="f-poste" placeholder="Intitulé du poste"></div>
+          <div class="field"><label>Service / Équipe</label><input type="text" id="f-service" placeholder="Service ou équipe"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Date d'intégration *</label><input type="date" id="f-integration"></div>
+          <div class="field"><label>Date de sensibilisation *</label><input type="date" id="f-sensibilisation"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="teal-bar"></div>
+      <div class="card-body">
+        <div class="section-title">2. Thèmes couverts — cochez chaque thème validé</div>
+        <div class="themes-list" id="themes-list">
+          <div class="theme-item" onclick="toggleTheme(this)">
+            <div class="theme-check"></div>
+            <div class="theme-body">
+              <div class="theme-name">Utilisation des extincteurs</div>
+              <div class="theme-desc">Identification des types d'extincteurs présents dans les locaux, mode d'emploi et consignes d'utilisation</div>
+            </div>
+          </div>
+          <div class="theme-item" onclick="toggleTheme(this)">
+            <div class="theme-check"></div>
+            <div class="theme-body">
+              <div class="theme-name">Issues de secours et sorties d'urgence</div>
+              <div class="theme-desc">Localisation, signalétique, règles d'utilisation et interdiction de condamnation</div>
+            </div>
+          </div>
+          <div class="theme-item" onclick="toggleTheme(this)">
+            <div class="theme-check"></div>
+            <div class="theme-body">
+              <div class="theme-name">Désamorçage des portes électriques</div>
+              <div class="theme-desc">Procédure en cas de panne ou d'urgence pour ouvrir les accès sécurisés</div>
+            </div>
+          </div>
+          <div class="theme-item" onclick="toggleTheme(this)">
+            <div class="theme-check"></div>
+            <div class="theme-body">
+              <div class="theme-name">Plan & procédures d'évacuation</div>
+              <div class="theme-desc">Visite des locaux, repérage des issues de secours et du point de rassemblement, lecture du plan affiché. Mise en situation (exercice d'évacuation) sur le trajet à emprunter en cas d'alerte</div>
+            </div>
+          </div>
+          <div class="theme-item" onclick="toggleTheme(this)">
+            <div class="theme-check"></div>
+            <div class="theme-body">
+              <div class="theme-name">Consignes générales en cas d'incendie</div>
+              <div class="theme-desc">Alerte, évacuation, interdiction d'utiliser les ascenseurs, comportements à adopter</div>
+            </div>
+          </div>
+          <div class="theme-item" onclick="toggleTheme(this)">
+            <div class="theme-check"></div>
+            <div class="theme-body">
+              <div class="theme-name">Information trousse de secours</div>
+              <div class="theme-desc">Localisation dans les locaux, contenu, personnes référentes à contacter en cas de besoin</div>
+            </div>
+          </div>
+          <div class="theme-item" onclick="toggleTheme(this)">
+            <div class="theme-check"></div>
+            <div class="theme-body">
+              <div class="theme-name">Sensibilisation SST (Santé & Sécurité au Travail)</div>
+              <div class="theme-desc">Module e-learning complété — certificat validé. Contenu : gestion du stress & appels difficiles, pauses & posture au poste, hygiène de vie en poste sédentaire, prévention des Risques Psychosociaux (RPS). Protocole RPS mis en place en concertation avec le CSE.</div>
+            </div>
+          </div>
+        </div>
+        <div class="error-msg" id="themes-error">Veuillez cocher au moins un thème validé.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="teal-bar"></div>
+      <div class="card-body">
+        <div class="section-title">3. Engagement & signature</div>
+        <div class="engagement-box">
+          Je soussigné(e) reconnais avoir été informé(e) et sensibilisé(e) à l'ensemble des thèmes cochés ci-dessus. Je m'engage à respecter les consignes de sécurité en vigueur au sein de l'entreprise Taxi TL.<br><br>
+          <em>Cette attestation constitue un justificatif de formation au sens de l'article L4141-2 du Code du Travail et est transmissible dans le cadre du Passeport Prévention (Art. L4141-5).</em>
+        </div>
+        <div class="field" style="margin-bottom:10px">
+          <label>Signature du salarié *</label>
+        </div>
+        <div class="sig-wrap">
+          <canvas id="sig-canvas" height="160"></canvas>
+          <div class="sig-actions"><button class="btn-clear" onclick="clearSig()">Effacer</button></div>
+        </div>
+        <div class="sig-hint">Signez avec le doigt (mobile) ou la souris (ordinateur)</div>
+        <div class="error-msg" id="sig-error">Veuillez apposer votre signature.</div>
+        <br>
+        <button class="btn-submit" onclick="submit()">✓ Valider et télécharger mon attestation</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div id="screen-success">
+  <div class="success-icon">✅</div>
+  <div class="success-title">Attestation validée !</div>
+  <div class="success-sub" id="success-sub"></div>
+  <button class="btn-pdf" onclick="downloadPDF()">⬇ Télécharger mon attestation PDF</button>
+  <button class="btn-new" onclick="restart()">Nouvelle attestation</button>
+</div>
+
+<script>
+const CODE = "Taxitl2026";
+let sigData = null;
+let formData = {};
+
+// ── LOGIN ──────────────────────────────────────────────────────────────────
+function checkCode(){
+  const val = document.getElementById('input-code').value.trim();
+  if(val === CODE){
+    document.getElementById('screen-login').style.display = 'none';
+    document.getElementById('screen-form').style.display = 'block';
+    initCanvas();
+    // Pré-remplir date du jour
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('f-sensibilisation').value = today;
+  } else {
+    const err = document.getElementById('login-error');
+    err.style.display = 'block';
+    err.textContent = 'Code incorrect — vérifiez auprès de votre responsable RH.';
+  }
+}
+
+// ── THEMES ─────────────────────────────────────────────────────────────────
+function toggleTheme(el){
+  el.classList.toggle('checked');
+  el.querySelector('.theme-check').textContent = el.classList.contains('checked') ? '✓' : '';
+  document.getElementById('themes-error').style.display = 'none';
+}
+
+// ── CANVAS SIGNATURE ────────────────────────────────────────────────────────
+function initCanvas(){
+  const canvas = document.getElementById('sig-canvas');
+  canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  ctx.strokeStyle = '#0D2B5E';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  let drawing = false, lx, ly;
+
+  function getPos(e){
+    const r = canvas.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    return { x: (src.clientX - r.left), y: (src.clientY - r.top) };
+  }
+
+  canvas.addEventListener('mousedown', e => { drawing = true; const p = getPos(e); lx=p.x; ly=p.y; });
+  canvas.addEventListener('mousemove', e => {
+    if(!drawing) return;
+    const p = getPos(e);
+    ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(p.x,p.y); ctx.stroke();
+    lx=p.x; ly=p.y;
+  });
+  canvas.addEventListener('mouseup', () => { drawing=false; });
+  canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing=true; const p=getPos(e); lx=p.x; ly=p.y; }, {passive:false});
+  canvas.addEventListener('touchmove', e => {
+    if(!drawing) return; e.preventDefault();
+    const p=getPos(e);
+    ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(p.x,p.y); ctx.stroke();
+    lx=p.x; ly=p.y;
+  }, {passive:false});
+  canvas.addEventListener('touchend', () => { drawing=false; });
+}
+
+function clearSig(){
+  const canvas = document.getElementById('sig-canvas');
+  canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+  sigData = null;
+}
+
+function isSigEmpty(){
+  const canvas = document.getElementById('sig-canvas');
+  const data = canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
+  return !data.some(v => v !== 0);
+}
+
+// ── SUBMIT ─────────────────────────────────────────────────────────────────
+function submit(){
+  let ok = true;
+
+  const nom = document.getElementById('f-nom').value.trim();
+  const prenom = document.getElementById('f-prenom').value.trim();
+  const poste = document.getElementById('f-poste').value.trim();
+  const integration = document.getElementById('f-integration').value;
+  const sensibilisation = document.getElementById('f-sensibilisation').value;
+
+  ['f-nom','f-prenom','f-poste','f-integration','f-sensibilisation'].forEach(id => {
+    const el = document.getElementById(id);
+    if(!el.value.trim()){ el.classList.add('error'); ok=false; }
+    else el.classList.remove('error');
+  });
+
+  const checked = [...document.querySelectorAll('.theme-item.checked')];
+  if(!checked.length){
+    document.getElementById('themes-error').style.display = 'block';
+    ok = false;
+  }
+
+  if(isSigEmpty()){
+    document.getElementById('sig-error').style.display = 'block';
+    ok = false;
+  } else {
+    document.getElementById('sig-error').style.display = 'none';
+  }
+
+  if(!ok) return;
+
+  sigData = document.getElementById('sig-canvas').toDataURL('image/png');
+
+  formData = {
+    nom, prenom, poste,
+    service: document.getElementById('f-service').value.trim(),
+    integration: formatDate(integration),
+    sensibilisation: formatDate(sensibilisation),
+    themes: checked.map(el => ({
+      name: el.querySelector('.theme-name').textContent,
+      desc: el.querySelector('.theme-desc').textContent
+    }))
+  };
+
+  document.getElementById('screen-form').style.display = 'none';
+  document.getElementById('screen-success').style.display = 'block';
+  document.getElementById('success-sub').innerHTML =
+    `<strong>${prenom} ${nom}</strong> — ${poste}<br>Sensibilisation du ${formData.sensibilisation}<br><br>Votre attestation est prête à télécharger. Une copie a été transmise au service RH.`;
+
+  window.scrollTo(0,0);
+}
+
+function formatDate(d){
+  if(!d) return '';
+  const [y,m,j] = d.split('-');
+  return `${j}/${m}/${y}`;
+}
+
+// ── PDF ─────────────────────────────────────────────────────────────────────
+function downloadPDF(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+  const W = 210, M = 18, CW = W - M*2;
+  let y = 0;
+
+  // Header bleu
+  doc.setFillColor(13,43,94);
+  doc.rect(0,0,W,42,'F');
+  doc.setFillColor(42,181,200);
+  doc.rect(0,42,W,2,'F');
+
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(20); doc.text('taxitl', W/2, 14, {align:'center'});
+  doc.setFontSize(12); doc.text('ATTESTATION INDIVIDUELLE DE SENSIBILISATION & FORMATION', W/2, 23, {align:'center'});
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(9); doc.text('Sécurité, Prévention des Risques & Santé au Travail', W/2, 30, {align:'center'});
+  doc.setFontSize(8); doc.setTextColor(180,200,220);
+  doc.text('Document transmissible au Passeport Prévention — Art. L4141-2 & L4141-5 du Code du Travail', W/2, 37, {align:'center'});
+
+  y = 52;
+
+  // Section 1
+  doc.setFillColor(240,245,251);
+  doc.rect(M, y, CW, 7,'F');
+  doc.setTextColor(13,43,94); doc.setFont('helvetica','bold'); doc.setFontSize(9);
+  doc.text('1. IDENTIFICATION DU SALARIÉ', M+3, y+5);
+  y += 13;
+
+  const fields = [
+    ['Nom et prénom', `${formData.prenom} ${formData.nom}`],
+    ['Poste occupé', formData.poste],
+    ['Service / Équipe', formData.service || '—'],
+    ['Date d\'intégration', formData.integration],
+    ['Date de sensibilisation', formData.sensibilisation],
+  ];
+
+  fields.forEach(([label, val]) => {
+    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(13,43,94);
+    doc.text(label+' :', M, y);
+    doc.setFont('helvetica','normal'); doc.setTextColor(30,40,55);
+    doc.text(val, M+52, y);
+    doc.setDrawColor(200,216,232); doc.line(M+52, y+1, W-M, y+1);
+    y += 8;
+  });
+
+  y += 6;
+
+  // Section 2
+  doc.setFillColor(240,245,251);
+  doc.rect(M, y, CW, 7,'F');
+  doc.setTextColor(13,43,94); doc.setFont('helvetica','bold'); doc.setFontSize(9);
+  doc.text('2. CONTENU DE LA SENSIBILISATION RÉALISÉE', M+3, y+5);
+  y += 11;
+
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(50,60,80);
+  doc.text('Le salarié identifié ci-dessus atteste avoir reçu, lors de son intégration, une sensibilisation aux thèmes suivants :', M, y);
+  y += 8;
+
+  formData.themes.forEach(t => {
+    doc.setFillColor(234,245,240);
+    doc.setDrawColor(26,122,85);
+    doc.roundedRect(M, y-4, CW, 5 + doc.splitTextToSize(t.desc, CW-18).length * 4.5, 2, 2, 'FD');
+    doc.setTextColor(26,122,85); doc.setFont('helvetica','bold'); doc.setFontSize(9);
+    doc.text('✓  '+t.name, M+3, y);
+    y += 5;
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(80,100,110);
+    const lines = doc.splitTextToSize(t.desc, CW-18);
+    lines.forEach(l => { doc.text(l, M+8, y); y+=4; });
+    y += 3;
+  });
+
+  y += 4;
+
+  // Section 3
+  doc.setFillColor(240,245,251);
+  doc.rect(M, y, CW, 7,'F');
+  doc.setTextColor(13,43,94); doc.setFont('helvetica','bold'); doc.setFontSize(9);
+  doc.text('3. ENGAGEMENT & SIGNATURE', M+3, y+5);
+  y += 11;
+
+  doc.setFillColor(232,247,250); doc.setDrawColor(42,181,200);
+  const engText = doc.splitTextToSize("Je soussigné(e) reconnais avoir été informé(e) et sensibilisé(e) à l'ensemble des thèmes ci-dessus. Je m'engage à respecter les consignes de sécurité en vigueur au sein de Taxi TL. Cette attestation constitue un justificatif de formation au sens de l'article L4141-2 du Code du Travail.", CW-6);
+  doc.roundedRect(M, y-3, CW, engText.length*4.5+6, 2,2,'FD');
+  doc.setFont('helvetica','italic'); doc.setFontSize(8.5); doc.setTextColor(13,43,94);
+  engText.forEach(l => { doc.text(l, M+3, y); y+=4.5; });
+  y += 8;
+
+  // Signature
+  doc.setTextColor(13,43,94); doc.setFont('helvetica','bold'); doc.setFontSize(9);
+  doc.text('Signature du salarié :', M, y);
+  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(96,112,128);
+  doc.text(`Fait à Lyon, le ${formData.sensibilisation}`, W-M, y, {align:'right'});
+  y += 5;
+
+  doc.setDrawColor(200,216,232);
+  doc.rect(M, y, CW/2-5, 28);
+  if(sigData){
+    doc.addImage(sigData, 'PNG', M+2, y+2, CW/2-9, 24);
+  }
+  y += 32;
+
+  // Footer
+  doc.setFillColor(240,245,251);
+  doc.rect(0, 282, W, 15,'F');
+  doc.setFillColor(42,181,200); doc.rect(0,282,W,1,'F');
+  doc.setFont('helvetica','italic'); doc.setFontSize(7.5); doc.setTextColor(96,112,128);
+  doc.text('Taxi TL — Service Ressources Humaines  |  L\'excellence comme moteur, depuis 1971  |  Validé par la Direction & le Management  |  MàJ le 02/03/2026', W/2, 289, {align:'center'});
+
+  doc.save(`Attestation_${formData.nom}_${formData.prenom}_${formData.sensibilisation.replace(/\//g,'-')}.pdf`);
+}
+
+function restart(){
+  location.reload();
+}
+</script>
+</body>
+</html>
